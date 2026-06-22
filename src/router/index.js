@@ -7,7 +7,7 @@ import Wishlist  from'@/components/Wishlist.vue'
 import cart from '@/components/Cart.vue'
 import Books from '@/components/Books.vue'
 import Admin from'@/components/Admin.vue'
-
+import SignUp from '@/components/SignUp.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -33,6 +33,10 @@ const router = createRouter({
       component:Wishlist
     },
     {
+      path:'/sign_up',
+      component:SignUp
+    },
+    {
       path:'/cart',
       component:cart
     },
@@ -40,7 +44,8 @@ const router = createRouter({
       path:'/profile',
       component:profile
     },
-    {path:'/library',
+    {
+      path:'/library',
       component:Library
     }
   ],
