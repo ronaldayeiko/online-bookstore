@@ -1,8 +1,13 @@
 <script setup>
 import { ref } from 'vue'
+import {useAuth} from '../services/auth'
+import { useRouter } from "vue-router";
+const router= useRouter();
+
+const { signup } = useAuth()
 
 const showPassword = ref(false)
-const password = ref(null) 
+const password = ref(null) //model
 
 const confirmPassword= ref(null)
 const showConfirm = ref(false)
@@ -31,15 +36,17 @@ function register()
         location:location.value,
         password:password.value,
         address:address.value,
+        role: 2,
 
+        //role 1 for admin ,role 2 customer
     }
-    try{
-        localStorage.setItem("user",JSON.stringify(data))
-    }catch{
-    console.log("error sigining up")
+    signup(data)
+    router.push('/').then(() =>{
+        router.go(0)
+    });
+  
+}
 
-}
-}
 
 
 </script>
@@ -48,6 +55,9 @@ function register()
     <v-row>
         <v-col>
             <v-card max width="80%" class="bg-secondary">
+                <v-img src="/logo.png"height="150"width="200"class="mt-4"></v-img>
+                <v-card-title class="ma-5">sign up</v-card-title>
+                <v-divider></v-divider>
                 <v-form class="ma-8">
                     <v-row>
                         <v-col md="3">
@@ -125,12 +135,13 @@ function register()
                     </v-row>
                     <v-row>
                         <v-col md="6">
-                            <v-btn @click="register()">sign up</v-btn>
+                            <v-btn @click="register()" block>sign up</v-btn>
                         
                         </v-col>
                         <v-col md="6">
                         <div>
                             Alraedy have an acount ?
+                            <router-link to ='/login'>login</router-link>
                         </div>
                         </v-col>
                     </v-row>
