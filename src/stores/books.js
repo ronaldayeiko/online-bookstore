@@ -275,7 +275,50 @@ export const useBooksStore = defineStore('books',  {
    actions:{
        updateSelectedBook (payload) {
            this.selectedBook = payload
-       },
+       }, 
+
+            addBook(payload) {
+                //get the last key in the book object
+            const existingKeys = Object.keys(this.books).map(Number);
+            const maxKey = existingKeys.length > 0 ? Math.max(...existingKeys) : 0;
+            const nextKey = maxKey + 1;
+                    //insert into object
+            this.books[nextKey] = {
+                ...payload,
+                id: nextKey
+            };
+        },
+        edit(id, payload) {
+            //find book in the object
+            const book = Object.entries(this.books).find(
+                ([key, item]) => item.id === id //compare the id 
+            );
+
+            if (!book) {
+                console.error(`No book found with id: ${id}`);
+                return;
+            }
+
+            const [objectKey] = book;
+            //replace the existing book data with what was received in pay load
+            this.books[objectKey] = {
+                ...this.books[objectKey], 
+                ...payload
+            };
+        },
+        deleteBook(id) {
+            const book = Object.entries(this.books).find(
+                ([key, item]) => item.id === id
+            );
+            if (!book) {
+                console.error(`Cannot delete: No book found id: ${id}`);
+                return;
+            }
+
+            const [objectKey] = book;
+
+            delete this.books[objectKey];
+        }
    },
    persist: true,
 })

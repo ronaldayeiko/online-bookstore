@@ -29,6 +29,7 @@ const allOrders = Object.values(orders).map(order => {
 });
 
 const tab = ref(null)
+const refreshKey =ref (0);
 const showAddBookDialog=ref(false)
 const showEditBookDialog=ref(false)
 const showAddUserDialog=ref(false)
@@ -53,7 +54,7 @@ const showEditUserDialog=ref(false)
  function addBook(){
    const bookData={
       bookId: bookId.value,
-      bookName:bookName.value,
+      name:bookName.value,
       price:price.value,
       description:description.value,
       long_description:long_description.value,
@@ -62,11 +63,11 @@ const showEditUserDialog=ref(false)
       author:author.value,
       rating:rating.value
    }
-   const updateBook={
-      ...books,
-      22:bookData
+   //  update books in the store
+   booksStore.addBook(bookData)
+   close()
    }
- }
+ 
 //edit book
 function editBook(book){
    bookId.value =book.id 
@@ -83,7 +84,7 @@ function editBook(book){
 function updateBook(){
    const bookData={
       bookId: bookId.value,
-      bookName:bookName.value,
+      name:bookName.value,
       price:price.value,
       description:description.value,
       long_description:long_description.value,
@@ -93,9 +94,16 @@ function updateBook(){
       rating:rating.value
    }
    //  to do update book
+   booksStore.edit(bookId.value,bookData)
    close()
+   refreshKey.value += 1
 }
+//delete
 
+function destroybook(id){
+   booksStore.deleteBook(id);
+   refreshKey.value += 1;
+}
 //user models
 const userId= ref(null)
 const firstname= ref(null)
@@ -119,9 +127,9 @@ function addUser(){
         role: 2,
 
     }
-    // to do : add user
-
-    close()
+    //add user
+   usersStore.addUser(data)
+   close()
 }
 // edit user
 function editUser(user){
@@ -133,6 +141,8 @@ function editUser(user){
    location.value=user.location
    address.value=user.address
    showEditUserDialog.value=true
+
+
 }
 
 //update user 
@@ -149,9 +159,18 @@ function updateUser(){
         role: 2,
 
     }
-    // to do : edit user
+    // edit user
+    
+   usersStore.editUser(userId.value,data)
+   refreshKey.value+=1
+   close()
+   
+}
+//delete
 
-    close()
+function destroyUser(id){
+   usersStore.deleteUser(id);
+   refreshKey.value += 1;
 }
 
  
@@ -184,7 +203,7 @@ function close(){
 </script>
 
 <template>
-    <v-container class="text-center mt-12 bg-secondary">
+    <v-container class="text-center mt-12 bg-secondary":key="refreshkey">
         <v-card>
             <v-tabs v-model="tab" align-tabs="center" color="primary" >
                 <v-tab :value="1">Books</v-tab>
@@ -232,7 +251,7 @@ function close(){
                                         <td>{{ item.genre }}</td>
                                         <td> <v-btn color="warning" size="small"><v-icon icon="mdi-eye" ></v-icon> View</v-btn> </td>
                                         <td> <v-btn color="blue" size="small" @click="editBook(item)"><v-icon icon="mdi-pencil" ></v-icon> Edit </v-btn> </td>
-                                        <td> <v-btn color="error" size="small"><v-icon icon="mdi-delete" ></v-icon> Delete</v-btn> </td>
+                                        <td> <v-btn color="error" size="small"><v-icon icon="mdi-delete" @click="destroybook(item.id)"></v-icon> Delete</v-btn> </td>
                                     </tr>
                                 </tbody>
                             </v-table>
@@ -277,7 +296,7 @@ function close(){
                                 </thead>
                                 <tbody>
                                     <tr v-for="item in users" :key="item.id" >
-                                        <td>{{ item.Firstname }}</td>
+                                        <td>{{ item.firstname }}</td>
                                         <td>{{ item.lastname }}</td>
                                         <td>{{ item.phone }}</td>
                                         <td>{{ item.location }}</td>
@@ -285,7 +304,7 @@ function close(){
                                             <td>{{ item.email }}</td>
                                         <td> <v-btn color="warning" size="small"><v-icon icon="mdi-eye" ></v-icon> View</v-btn> </td>
                                         <td> <v-btn color="blue" size="small" @click="editUser(item)"><v-icon icon="mdi-pencil" ></v-icon> Edit </v-btn> </td>
-                                        <td> <v-btn color="error" size="small"><v-icon icon="mdi-delete" ></v-icon> Delete</v-btn> </td>
+                                        <td> <v-btn color="error" size="small"@click="destroyUser(item.id)"><v-icon icon="mdi-delete" ></v-icon> Delete</v-btn> </td>
                                     </tr>
                                 </tbody>
                             </v-table>
@@ -463,7 +482,53 @@ function close(){
 
     <!--edit user-->
      <!-- edit User -->
-    <v-dialog v-model="showEditUserDialog" max-width="600">
+    <v-dialog v-model="showAddUserDialog" max-width="600">
+        <v-form @submit.prevent >
+            <v-card>
+                <v-card-title class="pa-6">
+                <v-row>              
+
+                        Edit User
+                        <v-spacer></v-spacer>
+                        <v-btn class="ma-2" color="blue-darken-2" icon="mdi-close" @click="close();"></v-btn>
+                    </v-row>
+                </v-card-title>
+                <v-card-text>
+                    <v-row>
+                        <v-col md="6">
+                            <v-text-field label="First Name" v-model="firstname"></v-text-field>
+                        </v-col>
+                        <v-col md="6">
+                            <v-text-field label="Last Name" v-model="lastname"></v-text-field>
+                        </v-col>
+                    </v-row>
+                    
+                        <v-row>
+                        <v-col md="6">
+                            <v-text-field label="Email" v-model="email"></v-text-field>
+                        </v-col>
+                        <v-col md="6">
+                            <v-text-field label="254722345678" v-model="phone"></v-text-field>
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col md="6">
+                            <v-select v-model="location" label="Location" :items="['CBD', 'Madaraka', 'Westlands', 'Buruburu']" variant="outlined" ></v-select>
+                        </v-col>
+                        <v-col md="6">
+                                <v-text-field label="Address" v-model="address"></v-text-field>
+                        </v-col>
+                    </v-row>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn text="Close" variant="plain" @click="close()" ></v-btn>
+                    <v-btn color="primary"  text="Save" variant="tonal" @click="addUser()" ></v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-form>
+    </v-dialog>
+      <v-dialog v-model="showEditUserDialog" max-width="600">
         <v-form @submit.prevent >
             <v-card>
                 <v-card-title class="pa-6">
